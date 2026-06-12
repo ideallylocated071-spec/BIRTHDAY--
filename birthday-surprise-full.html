@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Birthday Surprise 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#fff0f5 0%,#fce4ec 30%,#f3e5f5 60%,#fff8e1 100%);
+  min-height:100vh;color:#5d2a42;overflow-x:hidden;
+}
+
+/* ── FLOATING PETALS ── */
+.petal{position:fixed;pointer-events:none;animation:petalFall linear infinite;z-index:0;opacity:.7}
+@keyframes petalFall{0%{transform:translateY(-40px) rotate(0deg);opacity:.8}100%{transform:translateY(110vh) rotate(540deg);opacity:0}}
+
+/* ── MUSIC BTN ── */
+#musicToggle{
+  position:fixed;top:16px;right:16px;z-index:999;
+  width:44px;height:44px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#f48fb1,#ce93d8);
+  color:#fff;font-size:18px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(244,143,177,.5);transition:transform .2s;
+}
+#musicToggle:hover{transform:scale(1.1)}
+
+/* ── PAGES ── */
+.page{
+  display:none;min-height:100vh;
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 16px;position:relative;z-index:1;
+  animation:pageIn .7s ease both;
+}
+.page.active{display:flex}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARD ── */
+.card{
+  background:rgba(255,255,255,.72);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.9);border-radius:28px;
+  padding:clamp(28px,6vw,52px) clamp(24px,6vw,56px);
+  max-width:480px;width:100%;
+  box-shadow:0 8px 40px rgba(206,147,216,.2),0 2px 8px rgba(244,143,177,.15);
+  text-align:center;
+}
+.brand{font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:#b07ab5;margin-bottom:6px}
+.brand-flowers{font-size:22px;margin-bottom:4px}
+h1{font-family:'Playfair Display',serif;font-size:clamp(26px,6vw,36px);font-weight:600;line-height:1.25;margin-bottom:8px;background:linear-gradient(135deg,#e91e8c,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-family:'Playfair Display',serif;font-size:clamp(22px,5vw,30px);font-weight:400;font-style:italic;margin-bottom:14px;color:#c2185b}
+.sub{font-size:14px;color:#a0688a;margin-bottom:22px;line-height:1.6}
+
+/* ── INPUTS ── */
+.field{margin-bottom:14px;text-align:left}
+.field label{display:block;font-size:12px;font-weight:500;letter-spacing:.08em;color:#b07ab5;margin-bottom:6px}
+.field input,.field textarea{
+  width:100%;padding:13px 16px;
+  border:1.5px solid rgba(206,147,216,.4);border-radius:14px;
+  background:rgba(255,255,255,.8);
+  font-family:'Poppins',sans-serif;font-size:14px;color:#5d2a42;
+  outline:none;transition:border-color .3s,box-shadow .3s;
+}
+.field input:focus,.field textarea:focus{border-color:#ce93d8;box-shadow:0 0 0 3px rgba(206,147,216,.2)}
+.field textarea{resize:vertical;min-height:90px}
+
+/* ── BUTTONS ── */
+.btn{
+  width:100%;padding:15px;border:none;border-radius:16px;
+  font-family:'Poppins',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:transform .2s,box-shadow .2s;
+}
+.btn-primary{background:linear-gradient(135deg,#e91e8c,#9c27b0);color:#fff;box-shadow:0 6px 24px rgba(233,30,140,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(233,30,140,.45)}
+.btn-secondary{background:linear-gradient(135deg,#f48fb1,#ce93d8);color:#fff;box-shadow:0 6px 20px rgba(244,143,177,.35);margin-top:12px}
+.btn:active{transform:scale(.98)}
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#e0aed0;font-size:13px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,#f0b8d4,transparent)}
+
+/* ══════════════════════════════════
+   PAGE 1 — PHOTO UPLOAD SECTION
+══════════════════════════════════ */
+.photo-upload-section{margin:6px 0 18px}
+.photo-upload-label{display:block;font-size:12px;font-weight:500;letter-spacing:.08em;color:#b07ab5;margin-bottom:10px;text-align:left}
+.photo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.photo-slot{
+  aspect-ratio:1;border-radius:16px;
+  border:2px dashed rgba(206,147,216,.5);
+  background:rgba(255,255,255,.5);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:border-color .3s,background .3s,transform .2s;
+  overflow:hidden;position:relative;
+}
+.photo-slot:hover{border-color:#e91e8c;background:rgba(255,240,248,.8);transform:scale(1.04)}
+.photo-slot.has-photo{border-style:solid;border-color:rgba(233,30,140,.4)}
+.photo-slot .slot-icon{font-size:22px;margin-bottom:4px;opacity:.6}
+.photo-slot .slot-text{font-size:9px;color:#b07ab5;letter-spacing:.05em}
+.photo-slot img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.photo-slot .remove-btn{
+  position:absolute;top:4px;right:4px;
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(233,30,140,.85);color:#fff;
+  border:none;font-size:11px;line-height:20px;text-align:center;
+  cursor:pointer;display:none;z-index:2;
+}
+.photo-slot.has-photo .remove-btn{display:block}
+.photo-slot .caption-input{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(93,42,66,.75);
+  border:none;outline:none;
+  color:#fff;font-size:9px;font-family:'Poppins',sans-serif;
+  padding:4px 6px;text-align:center;
+  display:none;
+}
+.photo-slot.has-photo .caption-input{display:block}
+input[type=file]{display:none}
+.upload-all-btn{
+  width:100%;padding:11px;border:1.5px dashed rgba(233,30,140,.4);
+  border-radius:12px;background:rgba(255,240,248,.6);
+  font-family:'Poppins',sans-serif;font-size:13px;color:#e91e8c;
+  cursor:pointer;transition:background .3s,border-color .3s;
+}
+.upload-all-btn:hover{background:rgba(255,220,240,.8);border-color:#e91e8c}
+.photo-count{font-size:11px;color:#b07ab5;text-align:center;margin-top:6px}
+
+/* ══════════════════════════════════
+   PAGE 2 — PHOTO STORY GALLERY
+══════════════════════════════════ */
+#page2{padding:20px 16px 30px}
+.gallery-header{text-align:center;margin-bottom:20px;z-index:1;width:100%}
+.gallery-title{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,32px);font-style:italic;color:#c2185b;margin-bottom:6px}
+.gallery-sub{font-size:13px;color:#a0688a}
+
+/* ── POLAROID STRIP (horizontal scroll) ── */
+.polaroid-strip{
+  display:flex;gap:18px;
+  overflow-x:auto;
+  padding:16px 20px 24px;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  width:100%;max-width:600px;
+  scrollbar-width:none;
+}
+.polaroid-strip::-webkit-scrollbar{display:none}
+
+.polaroid{
+  flex:0 0 auto;
+  width:clamp(160px,42vw,200px);
+  scroll-snap-align:center;
+  background:#fff;
+  border-radius:4px;
+  box-shadow:0 6px 28px rgba(93,42,66,.18),0 2px 8px rgba(206,147,216,.2);
+  padding:10px 10px 28px;
+  position:relative;
+  transform:rotate(var(--rot));
+  transition:transform .3s,box-shadow .3s;
+  cursor:pointer;
+  animation:polaroidIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  animation-delay:var(--delay);
+}
+@keyframes polaroidIn{from{opacity:0;transform:rotate(var(--rot)) scale(.6) translateY(30px)}to{opacity:1;transform:rotate(var(--rot)) scale(1) translateY(0)}}
+.polaroid:hover{transform:rotate(0deg) scale(1.06);box-shadow:0 14px 40px rgba(233,30,140,.25)}
+
+.polaroid-img{
+  width:100%;aspect-ratio:1;object-fit:cover;
+  border-radius:2px;display:block;
+}
+.polaroid-emoji{
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;background:linear-gradient(135deg,#fce4ec,#f3e5f5);
+  border-radius:2px;
+}
+.polaroid-caption{
+  position:absolute;bottom:6px;left:0;right:0;
+  text-align:center;font-family:'Playfair Display',serif;
+  font-style:italic;font-size:12px;color:#9e6073;
+  padding:0 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.polaroid-heart{
+  position:absolute;top:-10px;right:-8px;
+  font-size:20px;
+  animation:heartFloat 2s ease-in-out infinite;
+  animation-delay:var(--delay);
+}
+@keyframes heartFloat{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-6px) rotate(10deg)}}
+
+/* Scroll hint */
+.scroll-hint{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:#b07ab5;letter-spacing:.08em;
+  margin:4px 0 14px;
+}
+.scroll-hint::before,.scroll-hint::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(206,147,216,.4),transparent)}
+
+/* ── LIGHTBOX ── */
+#lightbox{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(30,5,20,.92);
+  display:none;align-items:center;justify-content:center;
+  animation:lbIn .3s ease both;
+}
+#lightbox.open{display:flex}
+@keyframes lbIn{from{opacity:0}to{opacity:1}}
+#lbImg{
+  max-width:90vw;max-height:80vh;
+  object-fit:contain;border-radius:8px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+#lbCaption{
+  position:absolute;bottom:30px;left:0;right:0;text-align:center;
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(15px,4vw,20px);color:rgba(255,255,255,.85);
+}
+#lbClose{
+  position:absolute;top:20px;right:20px;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:none;
+  color:#fff;font-size:20px;cursor:pointer;
+}
+#lbPrev,#lbNext{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.12);border:none;
+  color:#fff;font-size:20px;cursor:pointer;
+  transition:background .2s;
+}
+#lbPrev{left:16px}#lbNext{right:16px}
+#lbPrev:hover,#lbNext:hover{background:rgba(233,30,140,.4)}
+
+/* ── STORY CARDS (below polaroids) ── */
+.story-section{width:100%;max-width:500px;margin-top:10px}
+.story-section-title{text-align:center;font-size:13px;color:#b07ab5;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.story-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.story-card{perspective:800px;cursor:pointer;height:clamp(130px,28vw,160px)}
+.story-card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.story-card.flipped .story-card-inner{transform:rotateY(180deg)}
+.story-front,.story-back{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,.8);
+  border:1px solid rgba(255,255,255,.9);border-radius:20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  padding:14px;box-shadow:0 4px 20px rgba(206,147,216,.2);
+}
+.story-back{transform:rotateY(180deg);background:linear-gradient(135deg,rgba(252,228,236,.9),rgba(243,229,245,.9))}
+.story-front .s-emoji{font-size:32px;margin-bottom:6px}
+.story-front .tap-hint{font-size:10px;color:#b07ab5;letter-spacing:.06em}
+.story-back p{font-size:12px;color:#6d2f52;line-height:1.55;text-align:center}
+
+/* ══════════════════════════════════
+   PAGE 3 — LETTER
+══════════════════════════════════ */
+.letter-card{
+  background:linear-gradient(160deg,rgba(255,240,248,.95),rgba(243,229,245,.95));
+  border:1px solid rgba(255,255,255,.9);border-radius:24px;
+  padding:36px 32px;max-width:460px;width:100%;
+  box-shadow:0 8px 40px rgba(206,147,216,.25);
+  position:relative;overflow:hidden;
+}
+.letter-card::before{content:'💌';font-size:120px;position:absolute;right:-20px;bottom:-20px;opacity:.06;line-height:1}
+.letter-to{font-size:13px;color:#b07ab5;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.letter-heading{font-family:'Playfair Display',serif;font-size:clamp(20px,5vw,28px);color:#c2185b;margin-bottom:18px;font-style:italic}
+.letter-body{font-size:14px;line-height:1.85;color:#6d2f52;white-space:pre-line}
+.letter-sign{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#e91e8c;margin-top:20px}
+
+/* ══════════════════════════════════
+   PAGE 4 — REASONS
+══════════════════════════════════ */
+.reasons-list{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.reason-item{
+  background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.9);
+  border-radius:18px;padding:16px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+  box-shadow:0 3px 14px rgba(206,147,216,.15);
+  opacity:0;transform:translateX(-20px);transition:opacity .5s ease,transform .5s ease;
+}
+.reason-item.visible{opacity:1;transform:translateX(0)}
+.reason-icon{font-size:26px;flex-shrink:0;margin-top:2px}
+.reason-num{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ce93d8;margin-bottom:3px;font-weight:600}
+.reason-text{font-size:13px;color:#6d2f52;line-height:1.55}
+
+/* ══════════════════════════════════
+   PAGE 5 — FLOWER WISHES
+══════════════════════════════════ */
+.flowers-row{display:flex;gap:20px;justify-content:center;margin:24px 0;flex-wrap:wrap}
+.flower-btn{
+  width:90px;height:90px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#f48fb1,#f06292);
+  font-size:13px;font-weight:500;font-family:'Poppins',sans-serif;
+  color:#fff;cursor:pointer;
+  box-shadow:0 6px 20px rgba(240,98,146,.4);
+  transition:transform .3s,box-shadow .3s;
+  animation:flowerBounce 2s ease-in-out infinite;
+}
+.flower-btn:nth-child(2){animation-delay:.3s;background:linear-gradient(135deg,#ce93d8,#ab47bc)}
+.flower-btn:nth-child(3){animation-delay:.6s;background:linear-gradient(135deg,#80cbc4,#4db6ac)}
+@keyframes flowerBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.flower-btn:hover{transform:scale(1.12) translateY(-4px)}
+.wish-reveal{
+  background:linear-gradient(135deg,#fce4ec,#f3e5f5);
+  border:1px solid rgba(255,255,255,.9);border-radius:20px;
+  padding:22px 26px;margin-top:16px;
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(16px,4vw,20px);color:#c2185b;line-height:1.5;
+  display:none;animation:wishIn .5s ease both;
+}
+@keyframes wishIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+/* ══════════════════════════════════
+   PAGE 6 — CAKE + GIFT
+══════════════════════════════════ */
+.gift-box{
+  font-size:90px;cursor:pointer;
+  animation:giftWiggle 2s ease-in-out infinite;
+  filter:drop-shadow(0 8px 20px rgba(233,30,140,.3));
+  user-select:none;
+}
+@keyframes giftWiggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.gift-revealed{
+  background:linear-gradient(135deg,#fce4ec,#f3e5f5);
+  border:1px solid rgba(255,255,255,.9);border-radius:24px;
+  padding:28px 24px;text-align:center;
+  animation:giftOpen .6s cubic-bezier(.34,1.56,.64,1) both;
+  max-width:400px;width:100%;
+}
+@keyframes giftOpen{from{opacity:0;transform:scale(.5) rotate(-10deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.cake-big{font-size:80px;cursor:pointer;transition:filter .4s;filter:drop-shadow(0 4px 18px rgba(255,200,0,.5))}
+.cake-hint{font-size:13px;color:#b07ab5;margin-top:8px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.hearts-bg{display:flex;justify-content:center;gap:8px;font-size:18px;margin:10px 0;color:#f48fb1}
+
+/* ══ EFFECTS ══ */
+.confetti-piece{
+  position:fixed;pointer-events:none;z-index:9999;
+  width:8px;height:8px;border-radius:2px;
+  animation:confettiBurst 1.4s ease-out forwards;
+}
+@keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--r))}}
+.heart-float{position:fixed;pointer-events:none;z-index:9999;font-size:20px;animation:heartUp 1.6s ease-out forwards}
+@keyframes heartUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-140px) scale(1.3)}}
+.sparkle{position:fixed;pointer-events:none;z-index:9998;font-size:14px;animation:sparkleFade .8s ease-out forwards}
+@keyframes sparkleFade{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0) rotate(180deg)}}
+.footer{font-size:11px;color:#c09ab0;text-align:center;margin-top:30px;padding-bottom:20px}
+
+@media(max-width:380px){.card{padding:22px 16px}.photo-slots{grid-template-columns:repeat(4,1fr);gap:7px}}
+</style>
+</head>
+<body>
+
+<div id="petals"></div>
+<button id="musicToggle" title="Toggle music">🎵</button>
+<audio id="bgAudio" loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto"></audio>
+
+<!-- Hidden file inputs (one per slot) -->
+<input type="file" id="fi0" accept="image/*" onchange="loadPhoto(0,this)">
+<input type="file" id="fi1" accept="image/*" onchange="loadPhoto(1,this)">
+<input type="file" id="fi2" accept="image/*" onchange="loadPhoto(2,this)">
+<input type="file" id="fi3" accept="image/*" onchange="loadPhoto(3,this)">
+<input type="file" id="fiBulk" accept="image/*" multiple onchange="loadBulk(this)">
+
+<!-- ══════════════════════════════════
+     LIGHTBOX
+══════════════════════════════════ -->
+<div id="lightbox">
+  <button id="lbClose" onclick="closeLB()">✕</button>
+  <button id="lbPrev" onclick="lbNav(-1)">‹</button>
+  <img id="lbImg" src="" alt=""/>
+  <button id="lbNext" onclick="lbNav(1)">›</button>
+  <div id="lbCaption"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 1 — FORM + PHOTO UPLOAD
+══════════════════════════════════ -->
+<div class="page active" id="page1">
+  <div style="text-align:center;margin-bottom:20px;z-index:1">
+    <div class="brand-flowers">🎀🌸🎀</div>
+    <div class="brand">Birthday Magic</div>
+  </div>
+  <div class="card">
+    <h1>Create a Birthday<br>Surprise 💕</h1>
+    <p class="sub">Make someone feel extra special today ✨</p>
+
+    <div class="field">
+      <label>👤 Your Name</label>
+      <input type="text" id="senderName" placeholder="e.g. Rahul" maxlength="30"/>
+    </div>
+    <div class="field">
+      <label>🎂 Birthday Person's Name</label>
+      <input type="text" id="recipientName" placeholder="e.g. Priya" maxlength="30"/>
+    </div>
+    <div class="field">
+      <label>💌 Your Birthday Message</label>
+      <textarea id="customMsg" placeholder="Write something from your heart… 💕" maxlength="300"></textarea>
+    </div>
+
+    <!-- PHOTO UPLOAD -->
+    <div class="photo-upload-section">
+      <div class="photo-upload-label">📸 Add Your Photos (up to 4)</div>
+      <div class="photo-slots" id="photoSlots">
+        <!-- built by JS -->
+      </div>
+      <button class="upload-all-btn" onclick="document.getElementById('fiBulk').click()">
+        📂 Upload multiple photos at once
+      </button>
+      <div class="photo-count" id="photoCount">0 / 4 photos added</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="goPage2()">✨ Create Birthday Magic ✨</button>
+    <div class="divider">🌸💖🌸</div>
+    <p style="font-size:12px;color:#b07ab5">Photos will appear as a beautiful Polaroid gallery 🎞️</p>
+  </div>
+  <div class="footer">Made with ❤️ · Birthday Surprise</div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 2 — POLAROID GALLERY + STORY
+══════════════════════════════════ -->
+<div class="page" id="page2">
+  <div class="gallery-header">
+    <div style="font-size:26px;margin-bottom:6px">🎞️</div>
+    <div class="gallery-title" id="galleryTitle">Our Little Story</div>
+    <div class="gallery-sub" id="gallerySub">Tap any photo to open it ✨</div>
+  </div>
+
+  <!-- Polaroid strip -->
+  <div class="polaroid-strip" id="polaroidStrip">
+    <!-- built by JS -->
+  </div>
+  <div class="scroll-hint" id="scrollHint" style="max-width:400px;width:90%">swipe to see all photos</div>
+
+  <!-- Story flip cards -->
+  <div class="story-section" style="padding:0 4px">
+    <div class="story-section-title">✦ &nbsp; flip the cards &nbsp; ✦</div>
+    <div class="story-grid" id="storyGrid"></div>
+  </div>
+
+  <div style="width:100%;max-width:500px;margin-top:22px;padding:0 4px">
+    <button class="btn btn-primary" onclick="goPage3()">Read Birthday Letter 💌</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 3 — LOVE LETTER
+══════════════════════════════════ -->
+<div class="page" id="page3">
+  <div style="text-align:center;margin-bottom:10px;font-size:28px">💌</div>
+  <div class="letter-card">
+    <div class="letter-to">A Birthday Love Letter</div>
+    <div class="letter-heading" id="letterHeading">To My Birthday Princess 👸</div>
+    <div style="font-size:12px;color:#ce93d8;margin-bottom:18px;font-style:italic">With all my love ❤️</div>
+    <div class="letter-body" id="letterBody"></div>
+    <div class="letter-sign">Forever yours 💕<br><span id="senderSign" style="font-size:13px;color:#b07ab5;font-family:'Poppins',sans-serif;font-style:normal">Your person ❤️</span></div>
+  </div>
+  <button class="btn btn-primary" style="max-width:460px;margin-top:18px" onclick="goPage4()">See Why I Love You 💝</button>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 4 — REASONS
+══════════════════════════════════ -->
+<div class="page" id="page4">
+  <div class="card" style="max-width:500px;padding-bottom:28px">
+    <div style="font-size:28px;margin-bottom:6px">💝</div>
+    <h2>Reasons I Love You</h2>
+    <p class="sub">…and counting ✨</p>
+  </div>
+  <div class="reasons-list" id="reasonsList"></div>
+  <button class="btn btn-primary" style="max-width:460px;margin-top:8px" onclick="goPage5()">🌸 Three Wishes — Pick a flower</button>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 5 — FLOWER WISHES
+══════════════════════════════════ -->
+<div class="page" id="page5">
+  <div class="card">
+    <div style="font-size:28px;margin-bottom:8px">🌸</div>
+    <h2>Make a Wish ✨</h2>
+    <p class="sub">Pick a flower to reveal your secret wish 🌺</p>
+    <div class="flowers-row">
+      <button class="flower-btn" onclick="revealWish(0,this)">PICK ME</button>
+      <button class="flower-btn" onclick="revealWish(1,this)">PICK ME</button>
+      <button class="flower-btn" onclick="revealWish(2,this)">PICK ME</button>
+    </div>
+    <div class="wish-reveal" id="wishReveal"></div>
+  </div>
+  <button class="btn btn-primary" style="max-width:460px;margin-top:18px" onclick="goPage6()">Open Your Gift Box 🎁</button>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 6 — CAKE + GIFT
+══════════════════════════════════ -->
+<div class="page" id="page6">
+  <div class="card" id="cakeCard">
+    <h2>Blow the candle, Beautiful 🕯️</h2>
+    <p class="sub">Make a wish before you open your gift!</p>
+    <div style="text-align:center;margin-top:10px">
+      <div class="cake-big" id="cakeEmoji" onclick="blowCandle()">🎂</div>
+      <div class="cake-hint" id="cakeHint">🌬️ Tap to blow the candle</div>
+      <div style="font-size:12px;color:#b07ab5;margin-top:6px">Close your eyes and make a wish ✨</div>
+    </div>
+  </div>
+  <div class="card" id="giftCard" style="display:none;margin-top:16px">
+    <div style="font-size:26px;margin-bottom:6px">🎀</div>
+    <h2>Now open your gift! 🎁</h2>
+    <p class="sub">Tap the box to reveal your surprise</p>
+    <div class="gift-box" id="giftBox" onclick="openGift()">🎁</div>
+    <div style="font-size:12px;color:#b07ab5;margin-top:8px">Tap to open! ✨</div>
+  </div>
+  <div id="giftRevealed" style="display:none;margin-top:16px">
+    <div class="gift-revealed">
+      <div style="font-size:52px;margin-bottom:12px">🎊</div>
+      <h2 id="finalHeading">Happy Birthday! 🎊</h2>
+      <p style="font-size:14px;color:#a0688a;margin:10px 0 16px;line-height:1.7">You are cherished more than words can say 💕</p>
+      <div class="hearts-bg">♥ ♥ ♥</div>
+      <p style="font-size:13px;color:#6d2f52;line-height:1.7;margin-top:12px">May this year bring you endless joy, love, and all beautiful things you deserve. 🌸</p>
+      <button class="btn btn-secondary" onclick="restart()">🔄 Create Another Surprise</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ STATE ══ */
+let sender='', recipient='', customMessage='';
+const photoData=[null,null,null,null]; // base64 strings
+const photoCaptions=['','','',''];
+const SLOT_HEARTS=['💖','💕','💗','💝'];
+const POLAROID_ROTS=['-3deg','2deg','-2deg','3deg','-1deg','2.5deg'];
+
+/* ══ PETALS ══ */
+const petalEmojis=['🌸','🌺','✨','💕','🌷'];
+const pc=document.getElementById('petals');
+for(let i=0;i<14;i++){
+  const p=document.createElement('div');p.className='petal';
+  p.textContent=petalEmojis[i%petalEmojis.length];
+  p.style.cssText=`left:${Math.random()*100}vw;font-size:${12+Math.random()*14}px;animation-duration:${6+Math.random()*8}s;animation-delay:-${Math.random()*10}s`;
+  pc.appendChild(p);
+}
+
+/* ══ MUSIC ══ */
+const audio=document.getElementById('bgAudio');
+const mBtn=document.getElementById('musicToggle');
+let playing=false;
+function tryPlay(){audio.volume=.35;audio.play().then(()=>{playing=true;mBtn.textContent='🎵'}).catch(()=>{})}
+mBtn.onclick=()=>{if(playing){audio.pause();playing=false;mBtn.textContent='🔇'}else{audio.play();playing=true;mBtn.textContent='🎵'}};
+document.addEventListener('click',()=>{if(!playing)tryPlay()},{once:true});
+
+/* ══ BUILD PHOTO SLOTS ══ */
+function buildSlots(){
+  const c=document.getElementById('photoSlots');c.innerHTML='';
+  for(let i=0;i<4;i++){
+    c.innerHTML+=`
+    <div class="photo-slot ${photoData[i]?'has-photo':''}" id="slot${i}" onclick="slotClick(${i})">
+      ${photoData[i]?`<img src="${photoData[i]}" alt="photo ${i+1}"/>`:`<div class="slot-icon">📷</div><div class="slot-text">Add photo</div>`}
+      <button class="remove-btn" onclick="removePhoto(${i},event)">✕</button>
+      <input class="caption-input" id="cap${i}" type="text" placeholder="Caption…" maxlength="24"
+        value="${photoCaptions[i]}" onclick="event.stopPropagation()" oninput="photoCaptions[${i}]=this.value" />
+    </div>`;
+  }
+  updateCount();
+}
+buildSlots();
+
+function updateCount(){
+  const n=photoData.filter(Boolean).length;
+  document.getElementById('photoCount').textContent=`${n} / 4 photo${n!==1?'s':''} added`;
+}
+function slotClick(i){if(!photoData[i])document.getElementById('fi'+i).click()}
+function removePhoto(i,e){
+  e.stopPropagation();photoData[i]=null;photoCaptions[i]='';buildSlots();
+}
+function loadPhoto(idx,input){
+  if(!input.files[0])return;
+  const r=new FileReader();
+  r.onload=ev=>{photoData[idx]=ev.target.result;photoCaptions[idx]='';buildSlots()};
+  r.readAsDataURL(input.files[0]);
+  input.value='';
+}
+function loadBulk(input){
+  const files=Array.from(input.files).slice(0,4);
+  let slot=0;
+  files.forEach(f=>{
+    while(slot<4&&photoData[slot])slot++;
+    if(slot>=4)return;
+    const idx=slot++;
+    const r=new FileReader();
+    r.onload=ev=>{photoData[idx]=ev.target.result;photoCaptions[idx]='';buildSlots()};
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+
+/* ══ EFFECTS ══ */
+function burst(x,y){
+  const colors=['#f48fb1','#ce93d8','#80cbc4','#fff176','#ff8a65','#e91e8c'];
+  for(let i=0;i<28;i++){
+    const el=document.createElement('div');el.className='confetti-piece';
+    const a=Math.random()*360,d=80+Math.random()*120;
+    el.style.cssText=`left:${x}px;top:${y}px;background:${colors[i%colors.length]};--tx:${Math.cos(a*Math.PI/180)*d}px;--ty:${Math.sin(a*Math.PI/180)*d}px;--r:${Math.random()*720}deg;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+function floatHearts(x,y){
+  for(let i=0;i<5;i++){
+    const h=document.createElement('div');h.className='heart-float';
+    h.textContent=['💖','💕','💗','💝','🌸'][i];
+    h.style.cssText=`left:${x-20+i*12}px;top:${y-10}px;animation-delay:${i*.1}s`;
+    document.body.appendChild(h);h.addEventListener('animationend',()=>h.remove());
+  }
+}
+function sparkleTrail(e){
+  if(e.target.closest('#lightbox')||e.target.closest('.photo-slot')||e.target.closest('.caption-input'))return;
+  const s=document.createElement('div');s.className='sparkle';
+  s.textContent=['✨','⭐','💫','🌟'][Math.floor(Math.random()*4)];
+  s.style.cssText=`left:${e.clientX}px;top:${e.clientY}px`;
+  document.body.appendChild(s);s.addEventListener('animationend',()=>s.remove());
+}
+document.addEventListener('click',sparkleTrail);
+
+/* ══ PAGE NAV ══ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ PAGE 1 → 2 ══ */
+function goPage2(){
+  sender=document.getElementById('senderName').value.trim()||'Someone Special';
+  recipient=document.getElementById('recipientName').value.trim()||'You';
+  customMessage=document.getElementById('customMsg').value.trim();
+  // sync captions from inputs
+  for(let i=0;i<4;i++){const c=document.getElementById('cap'+i);if(c)photoCaptions[i]=c.value}
+  buildGallery();
+  buildStoryCards();
+  showPage('page2');
+  tryPlay();
+}
+
+/* ══ BUILD POLAROID GALLERY ══ */
+const defaultPhotos=[
+  {emoji:'🎂',cap:'Happy Birthday!'},
+  {emoji:'🌸',cap:'Your smile ✨'},
+  {emoji:'🌟',cap:'Golden moments'},
+  {emoji:'🧸',cap:'Always with you'},
+];
+let lbPhotos=[];// {src,cap} for lightbox
+let lbIdx=0;
+
+function buildGallery(){
+  const strip=document.getElementById('polaroidStrip');
+  strip.innerHTML='';
+  lbPhotos=[];
+
+  const hasAny=photoData.some(Boolean);
+  const items=[];
+
+  if(hasAny){
+    photoData.forEach((d,i)=>{
+      if(d) items.push({type:'photo',src:d,cap:photoCaptions[i]||`Memory ${i+1} 💕`});
+    });
+    document.getElementById('gallerySub').textContent='Tap any photo to open it ✨';
+    document.getElementById('scrollHint').style.display=items.length>2?'flex':'none';
+  } else {
+    defaultPhotos.forEach(d=>items.push({type:'emoji',emoji:d.emoji,cap:d.cap}));
+    document.getElementById('gallerySub').textContent='Tap any card to open it ✨';
+    document.getElementById('scrollHint').style.display='flex';
+  }
+
+  document.getElementById('galleryTitle').textContent=`${recipient}'s Story 🎞️`;
+
+  items.forEach((item,i)=>{
+    const lbEntry=item.type==='photo'?{src:item.src,cap:item.cap}:null;
+    if(lbEntry)lbPhotos.push(lbEntry);
+    const lbI=lbPhotos.length-1;
+
+    const pol=document.createElement('div');
+    pol.className='polaroid';
+    pol.style.cssText=`--rot:${POLAROID_ROTS[i%POLAROID_ROTS.length]};--delay:${i*.12}s`;
+
+    const mediaHTML=item.type==='photo'
+      ?`<img class="polaroid-img" src="${item.src}" alt="photo"/>`
+      :`<div class="polaroid-emoji">${item.emoji}</div>`;
+
+    pol.innerHTML=`
+      ${mediaHTML}
+      <div class="polaroid-caption">${item.cap}</div>
+      <div class="polaroid-heart" style="--delay:${i*.2}s">${SLOT_HEARTS[i%4]}</div>`;
+
+    if(item.type==='photo'){
+      pol.onclick=()=>{openLB(lbI);const r=pol.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2)};
+    } else {
+      pol.onclick=()=>{pol.style.transform='rotate(0deg) scale(1.06)';const r=pol.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2);setTimeout(()=>pol.style.transform='',600)};
+    }
+    strip.appendChild(pol);
+  });
+}
+
+/* ══ LIGHTBOX ══ */
+function openLB(i){
+  if(lbPhotos.length===0)return;
+  lbIdx=i;renderLB();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLB(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+function renderLB(){
+  const p=lbPhotos[lbIdx];
+  document.getElementById('lbImg').src=p.src;
+  document.getElementById('lbCaption').textContent=p.cap;
+  document.getElementById('lbPrev').style.display=lbPhotos.length>1?'':'none';
+  document.getElementById('lbNext').style.display=lbPhotos.length>1?'':'none';
+}
+function lbNav(dir){lbIdx=(lbIdx+dir+lbPhotos.length)%lbPhotos.length;renderLB()}
+document.getElementById('lightbox').addEventListener('click',e=>{if(e.target===document.getElementById('lightbox'))closeLB()});
+
+/* ══ STORY CARDS ══ */
+const storyData=[
+  {emoji:'🎂',back:'The day you were born, the world got brighter 🌟'},
+  {emoji:'🌸',back:'Your smile is my favourite thing 🌺'},
+  {emoji:'🌟',back:'Every day with you is golden ✨'},
+  {emoji:'🧸',back:"You're the warmest hug in human form 🤗"},
+];
+function buildStoryCards(){
+  const grid=document.getElementById('storyGrid');grid.innerHTML='';
+  storyData.forEach((d,i)=>{
+    grid.innerHTML+=`
+    <div class="story-card" onclick="flipCard(this)">
+      <div class="story-card-inner">
+        <div class="story-front">
+          <div class="s-emoji">${d.emoji}</div>
+          <div class="tap-hint">Tap to reveal ✨</div>
+        </div>
+        <div class="story-back"><p>${d.back}</p></div>
+      </div>
+    </div>`;
+  });
+}
+function flipCard(el){
+  el.classList.toggle('flipped');
+  const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2);
+}
+
+/* ══ PAGE 2 → 3 ══ */
+function goPage3(){
+  document.getElementById('letterHeading').textContent=`To My Dearest ${recipient} 👸`;
+  document.getElementById('senderSign').textContent=`With love, ${sender} ❤️`;
+  document.getElementById('letterBody').textContent=customMessage
+    ?`My dearest ${recipient},\n\n${customMessage}\n\nYou bring so much joy, laughter, and love into this world. 💕\n\nOn this special day, know that every moment with you is a treasure. 🌟`
+    :`My dearest ${recipient},\n\nToday marks another year of your incredible existence, and I couldn't be more grateful to celebrate it with you. 🌸\n\nYou bring so much joy, laughter, and love into this world. 💕\n\nOn this special day, I want you to know that every moment spent with you is a treasure. 🌟`;
+  showPage('page3');
+}
+
+/* ══ PAGE 3 → 4 ══ */
+const reasonsData=[
+  {icon:'😊',text:`${recipient}'s smile lights up every room. It's genuinely contagious! 🌟`},
+  {icon:'💪',text:"You're stronger than you know. Watching you overcome challenges is inspiring."},
+  {icon:'🤣',text:"Your sense of humour is unmatched. You make me laugh even on my worst days 😂💕"},
+  {icon:'🌺',text:"You care so deeply for the people you love. Your heart is pure gold ✨"},
+  {icon:'🌙',text:"You make ordinary moments feel magical. Life with you is a beautiful adventure 🌙"},
+  {icon:'🎯',text:"You never give up. Your determination and passion are absolutely breathtaking 🏆"},
+];
+function goPage4(){
+  const list=document.getElementById('reasonsList');list.innerHTML='';
+  reasonsData.forEach((r,i)=>{
+    list.innerHTML+=`
+    <div class="reason-item" style="transition-delay:${i*.1}s">
+      <div class="reason-icon">${r.icon}</div>
+      <div>
+        <div class="reason-num">Reason #${String(i+1).padStart(2,'0')}</div>
+        <div class="reason-text">${r.text}</div>
+      </div>
+    </div>`;
+  });
+  showPage('page4');
+  setTimeout(()=>{document.querySelectorAll('.reason-item').forEach((el,i)=>setTimeout(()=>el.classList.add('visible'),i*140))},200);
+}
+
+/* ══ PAGE 4 → 5 ══ */
+const wishes=[
+  `May every dream you hold close come true this year 🌟`,
+  `May love surround you in every direction you turn 💕`,
+  `May joy be your constant companion all year long 🌸`,
+];
+let wishPicked=false;
+function revealWish(idx,btn){
+  if(wishPicked)return;wishPicked=true;
+  const rev=document.getElementById('wishReveal');rev.textContent=wishes[idx];rev.style.display='block';
+  btn.style.transform='scale(1.2)';btn.style.boxShadow='0 0 0 4px rgba(255,255,255,.5),0 12px 28px rgba(206,147,216,.6)';
+  const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2);floatHearts(r.left+r.width/2,r.top);
+}
+function goPage5(){wishPicked=false;document.getElementById('wishReveal').style.display='none';showPage('page5')}
+
+/* ══ PAGE 5 → 6 ══ */
+function goPage6(){
+  document.getElementById('finalHeading').textContent=`Happy Birthday, ${recipient}! 🎊`;
+  showPage('page6');
+  document.getElementById('cakeCard').style.display='';
+  document.getElementById('giftCard').style.display='none';
+  document.getElementById('giftRevealed').style.display='none';
+  candleBlown=false;giftOpened=false;
+  document.getElementById('cakeEmoji').textContent='🎂';
+  document.getElementById('cakeHint').textContent='🌬️ Tap to blow the candle';
+}
+
+let candleBlown=false,giftOpened=false;
+function blowCandle(){
+  if(candleBlown)return;candleBlown=true;
+  document.getElementById('cakeHint').textContent='🎉 Wish made! Your gift is ready…';
+  const r=document.getElementById('cakeEmoji').getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/2);floatHearts(r.left+r.width/2,r.top);
+  setTimeout(()=>document.getElementById('giftCard').style.display='',900);
+}
+function openGift(){
+  if(giftOpened)return;giftOpened=true;
+  document.getElementById('giftBox').style.display='none';
+  document.getElementById('giftCard').style.display='none';
+  document.getElementById('giftRevealed').style.display='block';
+  for(let i=0;i<5;i++)setTimeout(()=>burst(window.innerWidth*(.2+Math.random()*.6),window.innerHeight*(.2+Math.random()*.4)),i*300);
+}
+function restart(){
+  sender='';recipient='';customMessage='';
+  for(let i=0;i<4;i++){photoData[i]=null;photoCaptions[i]=''}
+  document.getElementById('senderName').value='';
+  document.getElementById('recipientName').value='';
+  document.getElementById('customMsg').value='';
+  buildSlots();showPage('page1');
+}
+</script>
+</body>
+</html>
